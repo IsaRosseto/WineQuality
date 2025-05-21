@@ -46,80 +46,108 @@ Essa escolha foi feita por representar uma **relação prática e lógica**: ve�
 ## 💻 Código Completo (`analise_mtcars.R`)
 
 ```r
-# 📦 Carregando pacotes necessários
+# ===============================
+# 📦 CARREGANDO PACOTES
+# ===============================
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("MASS")) install.packages("MASS")
+
 library(ggplot2)
 library(dplyr)
 library(MASS)
 
-# 📂 Importando o dataset
-dados <- read.csv("mtcars.csv")  # Certifique-se que o arquivo esteja no mesmo diretório do script
-
-# 🎯 Definindo variáveis
+# ===============================
+# 📂 IMPORTAR DADOS
+# ===============================
+dados <- read.csv("mtcars.csv")  # Atualize o caminho se necessário
 x <- dados$wt
 y <- dados$mpg
 
-# 📊 Estatísticas descritivas
-calcular_estatisticas <- function(v) {
-  list(
-    media = mean(v),
-    variancia = var(v),
-    desvio_padrao = sd(v),
-    mediana = median(v)
-  )
+# ===============================
+# 🧮 ESTATÍSTICAS DESCRITIVAS
+# ===============================
+cat("📊 Estatísticas descritivas:\n\n")
+
+estatisticas <- function(nome, v) {
+  cat(paste0("▶ ", nome, "\n"))
+  cat("  Média: ", mean(v), "\n")
+  cat("  Variância: ", var(v), "\n")
+  cat("  Desvio Padrão: ", sd(v), "\n")
+  cat("  Mediana: ", median(v), "\n\n")
 }
 
-cat("🔹 Estatísticas para x (wt):\n")
-print(calcular_estatisticas(x))
+estatisticas("Peso (wt)", x)
+estatisticas("Consumo (mpg)", y)
 
-cat("\n🔸 Estatísticas para y (mpg):\n")
-print(calcular_estatisticas(y))
-
-# 📈 Histogramas
-ggplot(data.frame(x), aes(x = x)) +
-  geom_histogram(bins = 15, fill = "#2563EB", alpha = 0.6) +
-  ggtitle("Histograma do Peso (wt)") +
+# ===============================
+# 📈 HISTOGRAMAS
+# ===============================
+grafico_hist_x <- ggplot(data.frame(x), aes(x = x)) +
+  geom_histogram(bins = 15, fill = "#2563EB", alpha = 0.7, color = "white") +
+  ggtitle("Histograma: Peso do carro (wt)") +
   xlab("Peso (wt)") + ylab("Frequência") +
   theme_minimal()
 
-ggplot(data.frame(y), aes(x = y)) +
-  geom_histogram(bins = 15, fill = "#DC2626", alpha = 0.6) +
-  ggtitle("Histograma do Consumo (mpg)") +
+grafico_hist_y <- ggplot(data.frame(y), aes(x = y)) +
+  geom_histogram(bins = 15, fill = "#DC2626", alpha = 0.7, color = "white") +
+  ggtitle("Histograma: Consumo de combustível (mpg)") +
   xlab("Consumo (mpg)") + ylab("Frequência") +
   theme_minimal()
 
-# 📦 Boxplots
-ggplot(data.frame(x), aes(y = x)) +
-  geom_boxplot(fill = "#2563EB", alpha = 0.5) +
-  ggtitle("Boxplot do Peso (wt)") +
+print(grafico_hist_x)
+print(grafico_hist_y)
+
+# ===============================
+# 📦 BOXPLOTS
+# ===============================
+grafico_box_x <- ggplot(data.frame(x), aes(y = x)) +
+  geom_boxplot(fill = "#60A5FA", alpha = 0.7) +
+  ggtitle("Boxplot: Peso do carro (wt)") +
   ylab("Peso (wt)") +
   theme_minimal()
 
-ggplot(data.frame(y), aes(y = y)) +
-  geom_boxplot(fill = "#DC2626", alpha = 0.5) +
-  ggtitle("Boxplot do Consumo (mpg)") +
+grafico_box_y <- ggplot(data.frame(y), aes(y = y)) +
+  geom_boxplot(fill = "#F87171", alpha = 0.7) +
+  ggtitle("Boxplot: Consumo de combustível (mpg)") +
   ylab("Consumo (mpg)") +
   theme_minimal()
 
-# 🔁 Correlação
+print(grafico_box_x)
+print(grafico_box_y)
+
+# ===============================
+# 🔗 CORRELAÇÃO
+# ===============================
 correlacao <- cor(x, y)
-cat("\n🔗 Correlação entre Peso e Consumo:", correlacao, "\n")
+cat("🔗 Correlação de Pearson entre wt e mpg:", round(correlacao, 4), "\n\n")
 
-# 🧪 Teste de normalidade (Shapiro-Wilk)
-cat("\n📊 Teste de normalidade:\n")
-cat("Peso (wt): p-value =", shapiro.test(x)$p.value, "\n")
-cat("Consumo (mpg): p-value =", shapiro.test(y)$p.value, "\n")
+# ===============================
+# 🧪 TESTE DE NORMALIDADE
+# ===============================
+shapiro_x <- shapiro.test(x)
+shapiro_y <- shapiro.test(y)
 
-# 🧩 Densidade + Histograma
-ggplot(data.frame(x), aes(x = x)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 15, fill = "#60A5FA", alpha = 0.4) +
-  geom_density(color = "black", linewidth = 1) +
-  ggtitle("Densidade + Histograma de Peso (wt)") +
+cat("🧪 Teste de normalidade (Shapiro-Wilk):\n")
+cat("  Peso (wt): p-valor =", round(shapiro_x$p.value, 4), "\n")
+cat("  Consumo (mpg): p-valor =", round(shapiro_y$p.value, 4), "\n\n")
+
+# ===============================
+# 🎯 DENSIDADE + HISTOGRAMA
+# ===============================
+grafico_densidade_x <- ggplot(data.frame(x), aes(x = x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15, fill = "#60A5FA", alpha = 0.4, color = "white") +
+  geom_density(color = "black", linewidth = 1.2) +
+  ggtitle("Densidade + Histograma: Peso do carro (wt)") +
   xlab("Peso (wt)") + ylab("Densidade") +
   theme_minimal()
 
-ggplot(data.frame(y), aes(x = y)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 15, fill = "#F87171", alpha = 0.4) +
-  geom_density(color = "black", linewidth = 1) +
-  ggtitle("Densidade + Histograma de Consumo (mpg)") +
+grafico_densidade_y <- ggplot(data.frame(y), aes(x = y)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15, fill = "#F87171", alpha = 0.4, color = "white") +
+  geom_density(color = "black", linewidth = 1.2) +
+  ggtitle("Densidade + Histograma: Consumo (mpg)") +
   xlab("Consumo (mpg)") + ylab("Densidade") +
   theme_minimal()
+
+print(grafico_densidade_x)
+print(grafico_densidade_y)

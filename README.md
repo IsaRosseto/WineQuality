@@ -1,153 +1,143 @@
-# 📊 Projeto de Probabilidade e Estatística — Análise Bivariada com `mtcars`
+# 📊 Projeto de Análise de Wine Quality
 
-## 🎯 Objetivo do Projeto
-
-Este trabalho tem como finalidade aplicar conceitos de **estatística descritiva e inferencial** a partir de um conjunto de dados real, utilizando a linguagem de programação R. A análise envolve o cálculo de medidas estatísticas básicas, construção de gráficos, verificação de normalidade e interpretação da correlação entre duas variáveis.
+[![R ≥ 4.0](https://img.shields.io/badge/R-%3E%3D4.0-blue)](#) [![Pacotes](https://img.shields.io/badge/pacotes-tidyverse%20%7C%20ggplot2-lightgrey)](#)
 
 ---
 
-## 📁 Dataset Utilizado
+## 🎯 Objetivo  
+Analisar a relação entre teor alcoólico (`alcohol`) e nota de qualidade (`quality`) no dataset **winequality-red.csv**, aplicando:
 
-Utilizamos o clássico dataset `mtcars`, que contém dados sobre 32 modelos de veículos, com variáveis como número de cilindros, peso, potência, tipo de transmissão, entre outros.
-
----
-
-## 🔢 Variáveis Analisadas
-
-- **x = `wt`** — Peso do carro (em milhares de libras)
-- **y = `mpg`** — Milhas por galão (eficiência de combustível)
-
-Essa escolha foi feita por representar uma **relação prática e lógica**: veículos mais pesados tendem a consumir mais combustível, e isso é ideal para análise estatística com interpretação clara.
+- **Pré-processamento** de dados  
+- **Estatística descritiva**  
+- **Visualização** (histogramas, boxplots, densidade)  
+- **Teste de correlação** de Pearson  
+- **Teste de normalidade** (Shapiro-Wilk)  
 
 ---
 
-## 🧪 Análises Realizadas
-
-### a) Estatísticas descritivas:
-- Média, variância, desvio padrão e mediana de `x` e `y`.
-
-### b) Histogramas:
-- Frequência de distribuição de `wt` e `mpg`.
-
-### c) Boxplots:
-- Representação da dispersão e presença de outliers.
-
-### d) Correlação:
-- Correlação de Pearson entre `x` e `y`.
-
-### e) Teste de normalidade:
-- Teste de Shapiro-Wilk para ambas as variáveis.
-
-### f) Densidade + histograma:
-- Sobreposição da curva de densidade ao histograma.
+## 🗂️ Estrutura do Repositório  
+```text
+├── winequality-red.csv       # Dataset original
+├── analysis_script.R         # Script completo em R
+├── analise_wine.Rmd          # R Markdown (geração de PPTX)
+├── figures/                  # Gráficos gerados (.png)
+│   ├── histogram_alcohol.png
+│   ├── histogram_quality.png
+│   ├── boxplot_alcohol.png
+│   ├── boxplot_quality.png
+│   ├── density_hist_alcohol.png
+│   └── density_hist_quality.png
+└── README.md                 # Este documento
+```
 
 ---
 
-## 💻 Código Completo (`analise_mtcars.R`)
+## ⚙️ Pré-requisitos  
+- **R** versão ≥ 4.0  
+- Pacotes R:  
+  - `tidyverse`  
+  - `readr`  
+  - `ggplot2`  
+  - `rmarkdown` / `knitr`
 
+Instale com:
 ```r
-# ===============================
-# 📦 CARREGANDO PACOTES
-# ===============================
-if (!require("ggplot2")) install.packages("ggplot2")
-if (!require("dplyr")) install.packages("dplyr")
-if (!require("MASS")) install.packages("MASS")
+install.packages(c(
+  "tidyverse",
+  "readr",
+  "ggplot2",
+  "rmarkdown"
+))
+```
 
-library(ggplot2)
-library(dplyr)
-library(MASS)
+---
 
-# ===============================
-# 📂 IMPORTAR DADOS
-# ===============================
-dados <- read.csv("mtcars.csv")  # Atualize o caminho se necessário
-x <- dados$wt
-y <- dados$mpg
+## 📥 1. Carregamento e Limpeza  
+```r
+# 1.1 Carregar dados
+df <- readr::read_csv("winequality-red.csv")
 
-# ===============================
-# 🧮 ESTATÍSTICAS DESCRITIVAS
-# ===============================
-cat("📊 Estatísticas descritivas:\n\n")
+# 1.2 Remover duplicatas
+df <- dplyr::distinct(df)
 
-estatisticas <- function(nome, v) {
-  cat(paste0("▶ ", nome, "\n"))
-  cat("  Média: ", mean(v), "\n")
-  cat("  Variância: ", var(v), "\n")
-  cat("  Desvio Padrão: ", sd(v), "\n")
-  cat("  Mediana: ", median(v), "\n\n")
-}
+# 1.3 Tratar valores ausentes
+df <- tidyr::drop_na(df, alcohol, quality)
 
-estatisticas("Peso (wt)", x)
-estatisticas("Consumo (mpg)", y)
+# 1.4 Verificar contagem antes/depois
+cat("Linhas após limpeza:", nrow(df), "\n")
+```
 
-# ===============================
-# 📈 HISTOGRAMAS
-# ===============================
-grafico_hist_x <- ggplot(data.frame(x), aes(x = x)) +
-  geom_histogram(bins = 15, fill = "#2563EB", alpha = 0.7, color = "white") +
-  ggtitle("Histograma: Peso do carro (wt)") +
-  xlab("Peso (wt)") + ylab("Frequência") +
-  theme_minimal()
+---
 
-grafico_hist_y <- ggplot(data.frame(y), aes(x = y)) +
-  geom_histogram(bins = 15, fill = "#DC2626", alpha = 0.7, color = "white") +
-  ggtitle("Histograma: Consumo de combustível (mpg)") +
-  xlab("Consumo (mpg)") + ylab("Frequência") +
-  theme_minimal()
+## 🧮 2. Estatística Descritiva  
+Calcular média, variância, desvio-padrão e mediana:
+```r
+stats <- df %>%
+  summarise(
+    mean_x = mean(alcohol),
+    var_x  = var(alcohol),
+    sd_x   = sd(alcohol),
+    med_x  = median(alcohol),
+    mean_y = mean(quality),
+    var_y  = var(quality),
+    sd_y   = sd(quality),
+    med_y  = median(quality)
+  )
+print(stats)
+```
 
-print(grafico_hist_x)
-print(grafico_hist_y)
+---
 
-# ===============================
-# 📦 BOXPLOTS
-# ===============================
-grafico_box_x <- ggplot(data.frame(x), aes(y = x)) +
-  geom_boxplot(fill = "#60A5FA", alpha = 0.7) +
-  ggtitle("Boxplot: Peso do carro (wt)") +
-  ylab("Peso (wt)") +
-  theme_minimal()
+## 📈 3. Visualizações  
 
-grafico_box_y <- ggplot(data.frame(y), aes(y = y)) +
-  geom_boxplot(fill = "#F87171", alpha = 0.7) +
-  ggtitle("Boxplot: Consumo de combustível (mpg)") +
-  ylab("Consumo (mpg)") +
-  theme_minimal()
+| Tipo                  | Comando ggplot2                                       | Arquivo gerado                       |
+|-----------------------|-------------------------------------------------------|--------------------------------------|
+| Histograma `alcohol`  | `geom_histogram(bins = 30)`                           | `figures/histogram_alcohol.png`      |
+| Histograma `quality`  | `geom_histogram(bins = 7)`                            | `figures/histogram_quality.png`      |
+| Boxplot `alcohol`     | `geom_boxplot()`                                      | `figures/boxplot_alcohol.png`        |
+| Boxplot `quality`     | `geom_boxplot()`                                      | `figures/boxplot_quality.png`        |
+| Hist.+Densidade       | `geom_histogram(aes(y=..density..)) + geom_density()` | `figures/density_hist_alcohol.png`   |
+| Hist.+Densidade       | `geom_histogram(aes(y=..density..)) + geom_density()` | `figures/density_hist_quality.png`   |
 
-print(grafico_box_x)
-print(grafico_box_y)
+---
 
-# ===============================
-# 🔗 CORRELAÇÃO
-# ===============================
-correlacao <- cor(x, y)
-cat("🔗 Correlação de Pearson entre wt e mpg:", round(correlacao, 4), "\n\n")
+## 📊 4. Correlação  
+```r
+corr <- cor(df$alcohol, df$quality, method = "pearson")
+cat("Coeficiente de correlação (Pearson):", round(corr, 3), "\n")
+```
+- **Interpretação**:  
+  - +1 → correlação positiva perfeita  
+  - –1 → correlação negativa perfeita  
+  - 0  → sem correlação linear
 
-# ===============================
-# 🧪 TESTE DE NORMALIDADE
-# ===============================
-shapiro_x <- shapiro.test(x)
-shapiro_y <- shapiro.test(y)
+---
 
-cat("🧪 Teste de normalidade (Shapiro-Wilk):\n")
-cat("  Peso (wt): p-valor =", round(shapiro_x$p.value, 4), "\n")
-cat("  Consumo (mpg): p-valor =", round(shapiro_y$p.value, 4), "\n\n")
+## 🧪 5. Teste de Normalidade  
+```r
+sh_x <- stats::shapiro.test(df$alcohol)
+sh_y <- stats::shapiro.test(df$quality)
+cat("Alcohol: W =", round(sh_x$statistic,3), "p =", round(sh_x$p.value,3), "\n")
+cat("Quality: W =", round(sh_y$statistic,3), "p =", round(sh_y$p.value,3), "\n")
+```
+- **Hipótese nula**: dados seguem distribuição normal.  
+- **p-valor < 0.05** ⇒ rejeita normalidade.
 
-# ===============================
-# 🎯 DENSIDADE + HISTOGRAMA
-# ===============================
-grafico_densidade_x <- ggplot(data.frame(x), aes(x = x)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 15, fill = "#60A5FA", alpha = 0.4, color = "white") +
-  geom_density(color = "black", linewidth = 1.2) +
-  ggtitle("Densidade + Histograma: Peso do carro (wt)") +
-  xlab("Peso (wt)") + ylab("Densidade") +
-  theme_minimal()
 
-grafico_densidade_y <- ggplot(data.frame(y), aes(x = y)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 15, fill = "#F87171", alpha = 0.4, color = "white") +
-  geom_density(color = "black", linewidth = 1.2) +
-  ggtitle("Densidade + Histograma: Consumo (mpg)") +
-  xlab("Consumo (mpg)") + ylab("Densidade") +
-  theme_minimal()
+---
 
-print(grafico_densidade_x)
-print(grafico_densidade_y)
+## 🔍 6. Conclusão  
+- **Achados principais**:  
+  - Estatísticas centrais das variáveis.  
+  - Correlação entre teor alcoólico e qualidade.  
+  - Resultados do teste de normalidade.
+
+- **Limitações**:  
+  - Análise restrita a 2 variáveis.  
+  - Possível viés no conjunto de dados.
+
+
+## 📚 Referências  
+- **UCI ML Repository** – Wine Quality Dataset  
+- **tidyverse**, **ggplot2**, **rmarkdown** documentation  
+- Shapiro, S.S. & Wilk, M.B. (1965). An analysis of variance test for normality.

@@ -109,6 +109,22 @@ correlacao <- cor(x, y, method = "pearson")
 cat("🔗 Correlação de Pearson entre alcohol e quality:", round(correlacao, 4), "\n\n")
 
 # ===============================
+# 📊 GRÁFICO DE CORRELAÇÃO (SCATTER PLOT)
+# ===============================
+# Cria o gráfico de dispersão com uma linha de regressão linear
+
+grafico_correlacao <- ggplot(dados, aes(x = alcohol, y = quality)) +
+  geom_point(alpha = 0.3, color = "#4F46E5") +  # Pontos com transparência
+  geom_smooth(method = "lm", se = TRUE, color = "black", fill = "#A5B4FC") + # Linha de tendência linear com intervalo de confiança
+  ggtitle("Correlação entre Teor Alcoólico e Qualidade") +
+  xlab("Teor Alcoólico (%)") +
+  ylab("Nota de Qualidade (0 a 10)") +
+  theme_minimal()
+
+# Exibe o gráfico de correlação
+print(grafico_correlacao)
+
+# ===============================
 # 🧪 TESTE DE NORMALIDADE
 # ===============================
 # Shapiro-Wilk para normalidade

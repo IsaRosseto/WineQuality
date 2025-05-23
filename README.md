@@ -1,143 +1,51 @@
-# 📊 Projeto de Análise de Wine Quality
+# 🍷 Análise de Qualidade de Vinhos Tintos
 
-[![R ≥ 4.0](https://img.shields.io/badge/R-%3E%3D4.0-blue)](#) [![Pacotes](https://img.shields.io/badge/pacotes-tidyverse%20%7C%20ggplot2-lightgrey)](#)
+![Linguagem](https://img.shields.io/badge/Linguagem-R-blue.svg)
+![Licença](https://img.shields.io/badge/Licen%C3%A7a-MIT-green.svg)
 
----
+## 📜 Sobre o Projeto
 
-## 🎯 Objetivo  
-Analisar a relação entre teor alcoólico (`alcohol`) e nota de qualidade (`quality`) no dataset **winequality-red.csv**, aplicando:
+Este projeto realiza uma análise estatística exploratória sobre um conjunto de dados de vinhos tintos portugueses. O principal objetivo é investigar a relação entre as características físico-químicas dos vinhos, com foco no **teor alcoólico (X)**, e a sua **nota de qualidade sensorial (Y)**, que é atribuída por especialistas.
 
-- **Pré-processamento** de dados  
-- **Estatística descritiva**  
-- **Visualização** (histogramas, boxplots, densidade)  
-- **Teste de correlação** de Pearson  
-- **Teste de normalidade** (Shapiro-Wilk)  
+A análise busca responder à pergunta: "Vinhos com maior teor alcoólico tendem a receber melhores avaliações de qualidade?".
 
----
+## 🍷 Dataset
 
-## 🗂️ Estrutura do Repositório  
-```text
-├── winequality-red.csv       # Dataset original
-├── analysis_script.R         # Script completo em R
-├── analise_wine.Rmd          # R Markdown (geração de PPTX)
-├── figures/                  # Gráficos gerados (.png)
-│   ├── histogram_alcohol.png
-│   ├── histogram_quality.png
-│   ├── boxplot_alcohol.png
-│   ├── boxplot_quality.png
-│   ├── density_hist_alcohol.png
-│   └── density_hist_quality.png
-└── README.md                 # Este documento
-```
+O conjunto de dados utilizado é o `winequality-red.csv`, que contém 1.599 observações e 12 variáveis sobre amostras de vinhos tintos da região do Vinho Verde, em Portugal. 
 
----
+## 📊 Análises Realizadas
 
-## ⚙️ Pré-requisitos  
-- **R** versão ≥ 4.0  
-- Pacotes R:  
-  - `tidyverse`  
-  - `readr`  
-  - `ggplot2`  
-  - `rmarkdown` / `knitr`
+O projeto foi desenvolvido em R e seguiu as seguintes etapas:
 
-Instale com:
-```r
-install.packages(c(
-  "tidyverse",
-  "readr",
-  "ggplot2",
-  "rmarkdown"
-))
-```
+* **Pré-processamento dos Dados:** Limpeza do dataset com a remoção de linhas duplicadas e valores ausentes (NA), resultando em um conjunto de dados final com 1.359 observações. 
+* **Estatísticas Descritivas:** Cálculo de média, variância, desvio padrão e mediana para as variáveis de interesse (`alcohol` e `quality`). 
+* **Visualização de Dados:**
+    * Criação de **Histogramas** para visualizar a distribuição de frequência de cada variável.
+    * Geração de **Boxplots** para identificar a mediana, os quartis e os outliers.
+    * Desenvolvimento de gráficos de **Densidade** sobrepostos aos histogramas para uma melhor visualização da forma da distribuição.
+* **Análise de Correlação:** Cálculo do coeficiente de **Correlação de Pearson** para medir a força e a direção da relação linear entre teor alcoólico e qualidade.
+* **Teste de Hipóteses:** Aplicação do **Teste de Normalidade de Shapiro-Wilk** para verificar se as variáveis seguem uma distribuição normal.
 
----
+## 🛠️ Tecnologias Utilizadas
 
-## 📥 1. Carregamento e Limpeza  
-```r
-# 1.1 Carregar dados
-df <- readr::read_csv("winequality-red.csv")
+* **Linguagem de Programação:** **R**
+* **Bibliotecas Principais:**
+    * **`dplyr`**: Para manipulação e limpeza de dados.
+    * **`readr`**: Para importação do arquivo `.csv`.
+    * **`ggplot2`**: Para a criação de todas as visualizações de dados.
 
-# 1.2 Remover duplicatas
-df <- dplyr::distinct(df)
+## 📈 Principais Resultados
 
-# 1.3 Tratar valores ausentes
-df <- tidyr::drop_na(df, alcohol, quality)
+* Existe uma **correlação positiva moderada** entre o teor alcoólico e a qualidade do vinho, com um coeficiente de Pearson de aproximadamente **0.48**.  Isso sugere que, em geral, vinhos com mais álcool tendem a receber notas maiores.
+* A distribuição de qualidade não é normal; ela é **bimodal**, com picos claros nas notas **5 e 6**. Isso indica uma forte concentração de vinhos considerados "medianos".
+* O **Teste de Normalidade de Shapiro-Wilk** confirmou que nem a variável `alcohol` nem a `quality` seguem uma distribuição normal (p-valor = 0 para ambas).
+* A maioria dos vinhos analisados possui um teor alcoólico entre **9% e 11%** e uma nota de qualidade entre **5 e 7**.
 
-# 1.4 Verificar contagem antes/depois
-cat("Linhas após limpeza:", nrow(df), "\n")
-```
+## ✒️ Autores
 
----
+* [Isabella Vieira Silva Rosseto] 
+* [Gustavo Bertoluzzi Cardoso] 
 
-## 🧮 2. Estatística Descritiva  
-Calcular média, variância, desvio-padrão e mediana:
-```r
-stats <- df %>%
-  summarise(
-    mean_x = mean(alcohol),
-    var_x  = var(alcohol),
-    sd_x   = sd(alcohol),
-    med_x  = median(alcohol),
-    mean_y = mean(quality),
-    var_y  = var(quality),
-    sd_y   = sd(quality),
-    med_y  = median(quality)
-  )
-print(stats)
-```
+## 📄 Licença
 
----
-
-## 📈 3. Visualizações  
-
-| Tipo                  | Comando ggplot2                                       | Arquivo gerado                       |
-|-----------------------|-------------------------------------------------------|--------------------------------------|
-| Histograma `alcohol`  | `geom_histogram(bins = 30)`                           | `figures/histogram_alcohol.png`      |
-| Histograma `quality`  | `geom_histogram(bins = 7)`                            | `figures/histogram_quality.png`      |
-| Boxplot `alcohol`     | `geom_boxplot()`                                      | `figures/boxplot_alcohol.png`        |
-| Boxplot `quality`     | `geom_boxplot()`                                      | `figures/boxplot_quality.png`        |
-| Hist.+Densidade       | `geom_histogram(aes(y=..density..)) + geom_density()` | `figures/density_hist_alcohol.png`   |
-| Hist.+Densidade       | `geom_histogram(aes(y=..density..)) + geom_density()` | `figures/density_hist_quality.png`   |
-
----
-
-## 📊 4. Correlação  
-```r
-corr <- cor(df$alcohol, df$quality, method = "pearson")
-cat("Coeficiente de correlação (Pearson):", round(corr, 3), "\n")
-```
-- **Interpretação**:  
-  - +1 → correlação positiva perfeita  
-  - –1 → correlação negativa perfeita  
-  - 0  → sem correlação linear
-
----
-
-## 🧪 5. Teste de Normalidade  
-```r
-sh_x <- stats::shapiro.test(df$alcohol)
-sh_y <- stats::shapiro.test(df$quality)
-cat("Alcohol: W =", round(sh_x$statistic,3), "p =", round(sh_x$p.value,3), "\n")
-cat("Quality: W =", round(sh_y$statistic,3), "p =", round(sh_y$p.value,3), "\n")
-```
-- **Hipótese nula**: dados seguem distribuição normal.  
-- **p-valor < 0.05** ⇒ rejeita normalidade.
-
-
----
-
-## 🔍 6. Conclusão  
-- **Achados principais**:  
-  - Estatísticas centrais das variáveis.  
-  - Correlação entre teor alcoólico e qualidade.  
-  - Resultados do teste de normalidade.
-
-- **Limitações**:  
-  - Análise restrita a 2 variáveis.  
-  - Possível viés no conjunto de dados.
-
-
-## 📚 Referências  
-- **UCI ML Repository** – Wine Quality Dataset  
-- **tidyverse**, **ggplot2**, **rmarkdown** documentation  
-- Shapiro, S.S. & Wilk, M.B. (1965). An analysis of variance test for normality.
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
